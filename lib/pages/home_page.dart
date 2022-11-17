@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:torch_light/torch_light.dart';
 import 'package:ui_design_home/utils/smart_device_box.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,6 +20,36 @@ class _HomePageState extends State<HomePage> {
     ["Smart TV", "images/smart-tv.png", false],
     ["Smart Fan", "images/fan.png", false]
   ];
+  void powerSwitchChanged(bool value, int index  ) {
+    setState(() {
+      mySmartDevice[index][2] = value;
+    });
+  }
+
+  void tochLight()async{
+    // Enable torch and manage all kind of errors
+    try {
+      await TorchLight.enableTorch();
+    } on EnableTorchExistentUserException catch (e) {
+      // The camera is in use
+    } on EnableTorchNotAvailableException catch (e) {
+      // Torch was not detected
+    } on EnableTorchException catch (e) {
+      // Torch could not be enabled due to another error
+    }
+
+// Disable torch and manage all kind of errors
+    try {
+      await TorchLight.disableTorch();
+    } on DisableTorchExistentUserException catch (e) {
+      // The camera is in use
+    } on DisableTorchNotAvailableException catch (e) {
+      // Torch was not detected
+    } on DisableTorchException catch (e) {
+      // Torch could not be disabled due to another error
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,17 +85,24 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Column(
-                children: const [
+                children: [
                   Text("Welcome Home"),
                   Text(
                     "Mitch KOKO",
-                    style: TextStyle(fontSize: 40),
+                    style: GoogleFonts.bebasNeue(fontSize: 72),
                   )
                 ],
               ),
             ),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
+            ),
             const SizedBox(
-              height: 20,
+              height: 25,
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -78,14 +117,14 @@ class _HomePageState extends State<HomePage> {
                     itemCount: mySmartDevice.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                        childAspectRatio: 1/1.3),
+                            crossAxisCount: 2, childAspectRatio: 1 / 1.3),
                     itemBuilder: (context, index) {
-                      return  SmartDeviceBox(
-                        iconPath: mySmartDevice[index][1],
-                        powerOn: mySmartDevice[index][2],
-                        smartDeviceName: mySmartDevice[index][0],
-                        onChanged: (bool ) {  },);
+                      return SmartDeviceBox(
+                          iconPath: mySmartDevice[index][1],
+                          powerOn: mySmartDevice[index][2],
+                          smartDeviceName: mySmartDevice[index][0],
+                          onChanged: (value) =>
+                              powerSwitchChanged(value, index));
                     }))
           ],
         ),
